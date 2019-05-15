@@ -15,7 +15,7 @@ import Register from "./components/Auth/Register";
 import "semantic-ui-css/semantic.min.css";
 import firebase from "./firebase";
 import rootReducer from "./reducers";
-import { setUser } from "./actions";
+import { setUser, clearUser } from "./actions";
 import { createStore } from "redux";
 import { Provider } from "react-redux";
 import { composeWithDevTools } from "redux-devtools-extension";
@@ -28,6 +28,9 @@ class Root extends React.Component {
       if (user) {
         this.props.setUser(user);
         this.props.history.push("/");
+      } else {
+        this.props.history.push("/login");
+        this.props.clearUser();
       }
     });
   }
@@ -50,8 +53,8 @@ const mapStateFromProps = state => ({
 
 const RootWithAuth = withRouter(
   connect(
-    null,
-    { setUser }
+    mapStateFromProps,
+    { setUser, clearUser }
   )(Root)
 );
 
