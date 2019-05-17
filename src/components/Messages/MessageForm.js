@@ -57,7 +57,7 @@ class MessageForm extends React.Component {
   };
 
   render() {
-    const { errors } = this.state;
+    const { errors, message, loading } = this.state;
     return (
       <Segment className="message_form">
         <Input
@@ -66,6 +66,7 @@ class MessageForm extends React.Component {
           onChange={this.handleChange}
           style={{ marginButton: "0.7em" }}
           label={<Button icon={"add"} />}
+          value={message}
           labelPosition="left"
           className={
             errors.some(error => error.message.includes("message"))
@@ -80,6 +81,7 @@ class MessageForm extends React.Component {
             color="orange"
             content="Add Reply"
             labelPosition="left"
+            disabled={loading}
             icon="edit"
           />
           <Button
