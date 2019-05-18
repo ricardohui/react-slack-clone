@@ -5,6 +5,8 @@ import firebase from "../../firebase";
 class MessageForm extends React.Component {
   state = {
     message: "",
+
+    messagesLoading: true,
     channel: this.props.currentChannel,
     loading: false,
     user: this.props.currentUser,
