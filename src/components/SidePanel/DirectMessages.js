@@ -24,7 +24,9 @@ class DirectMessages extends React.Component {
     console.log("addListeners called");
     let loadedUsers = [];
     this.state.usersRef.on("child_added", snap => {
+      console.log("child_added in userRef");
       if (currentUserUid !== snap.key) {
+        console.log("snap.key" + snap.key);
         let user = snap.val();
         user["uid"] = snap.key;
         user["status"] = "offline";
@@ -34,6 +36,7 @@ class DirectMessages extends React.Component {
       }
     });
     this.state.connectedRef.on("value", snap => {
+      console.log("value in connectedRef");
       if (snap.val() === true) {
         const ref = this.state.presenceRef.child(currentUserUid);
         ref.set(true);
@@ -46,11 +49,13 @@ class DirectMessages extends React.Component {
     });
 
     this.state.presenceRef.on("child_added", snap => {
+      console.log("child_added in presenceRef");
       if (currentUserUid !== snap.key) {
         this.addStatusToUser(snap.key);
       }
     });
     this.state.presenceRef.on("child_removed", snap => {
+      console.log("child_removed in presenceRef");
       if (currentUserUid !== snap.key) {
         this.addStatusToUser(snap.key, false);
       }
@@ -58,6 +63,7 @@ class DirectMessages extends React.Component {
   };
 
   addStatusToUser = (userId, connected = true) => {
+    console.log("addStatusToUser has been called with userID: " + userId);
     const updatedUsers = this.state.users.reduce((acc, user) => {
       if (user.uid === userId) {
         user["status"] = `${connected ? "online" : "offline"}`;
@@ -93,6 +99,8 @@ class DirectMessages extends React.Component {
   };
   render() {
     const { users, activeChannel } = this.state;
+    console.log("users length");
+    console.log(users.length);
     return (
       <Menu.Menu className="menu">
         <Menu.Item>

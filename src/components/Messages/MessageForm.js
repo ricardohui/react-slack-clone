@@ -53,7 +53,7 @@ class MessageForm extends React.Component {
       this.setState({ loading: true });
       console.log("channel");
       console.log(channel.id);
-      getMessagesRef
+      getMessagesRef()
         .child(channel.id)
         .push()
         .set(this.createMessage())
@@ -186,13 +186,13 @@ class MessageForm extends React.Component {
             content="Upload Media"
             labelPosition="right"
             icon="cloud upload"
-          />
-          <FileModal
-            modal={modal}
-            closeModal={this.closeModal}
-            uploadFile={this.uploadFile}
-          />
-        </Button.Group>{" "}
+          />{" "}
+        </Button.Group>
+        <FileModal
+          modal={modal}
+          closeModal={this.closeModal}
+          uploadFile={this.uploadFile}
+        />{" "}
         <ProgressBar
           uploadState={uploadState}
           percentUploaded={percentUploaded}

@@ -30,11 +30,6 @@ class Messages extends React.Component {
     }
   }
 
-  getMessagesRef = () => {
-    const { messagesRef, privateMessagesRef, privateChannel } = this.state;
-    return privateChannel ? privateMessagesRef : messagesRef;
-  };
-
   addListeners = channelId => {
     this.addMessageListener(channelId);
   };
@@ -52,6 +47,10 @@ class Messages extends React.Component {
       });
       this.countUniqueUsers(loadedMessages);
     });
+  };
+  getMessagesRef = () => {
+    const { messagesRef, privateMessagesRef, privateChannel } = this.state;
+    return privateChannel ? privateMessagesRef : messagesRef;
   };
 
   handleSearchChange = event => {
@@ -106,14 +105,14 @@ class Messages extends React.Component {
     );
   };
 
+  displayChannelName = channel =>
+    channel ? `${this.state.privateChannel ? "@" : "#"}${channel.name}` : "";
   isProgressBarVisible = percent => {
     if (percent > 0) {
       this.setState({ ProgressBar: true });
     }
   };
 
-  displayChannelName = channel =>
-    channel ? `${this.state.privateChannel ? "@" : "#"}${channel.name}` : "";
   render() {
     const {
       messagesRef,
@@ -151,7 +150,7 @@ class Messages extends React.Component {
           currentUser={user}
           isProgressBarVisible={this.isProgressBarVisible}
           isPrivateChannel={privateChannel}
-          getMessageRef={this.getMessagesRef}
+          getMessagesRef={this.getMessagesRef}
         />
       </React.Fragment>
     );
