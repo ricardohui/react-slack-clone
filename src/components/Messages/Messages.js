@@ -1,17 +1,19 @@
 import React from "react";
 import { Segment, Comment } from "semantic-ui-react";
-import MessageHeader from "./MessageHeader";
 import firebase from "../../firebase";
+import MessageHeader from "./MessageHeader";
 import MessageForm from "./MessageForm";
 import Message from "./Message";
 import ProgressBar from "./ProgressBar";
 class Messages extends React.Component {
   state = {
-    messages: [],
+    privateChannel: this.props.isPrivateChannel,
+    privateMessagesRef: firebase.database().ref("privateMessages"),
     messagesRef: firebase.database().ref("messages"),
+    messages: [],
+    messagesLoading: true,
     channel: this.props.currentChannel,
     user: this.props.currentUser,
-    messagesLoading: true,
     progressBar: false,
     numUniqueUsers: "",
     searchTerm: "",
@@ -28,13 +30,19 @@ class Messages extends React.Component {
     }
   }
 
+  getMessagesRef = () => {
+    const { messagesRef, privateMessagesRef, privateChannel } = this.state;
+    return privateChannel ? privateMessagesRef : messagesRef;
+  };
+
   addListeners = channelId => {
     this.addMessageListener(channelId);
   };
 
   addMessageListener = channelId => {
     let loadedMessages = [];
-    this.state.messagesRef.child(channelId).on("child_added", snap => {
+    const ref = this.getMessagesRef();
+    ref.child(channelId).on("child_added", snap => {
       loadedMessages.push(snap.val());
       console.log("messages are updated");
       console.log(loadedMessages);
@@ -47,8 +55,12 @@ class Messages extends React.Component {
   };
 
   handleSearchChange = event => {
-    this.setState({ searchTerm: event.target.value, searchLoading: true }, () =>
-      this.handleSearchMessages()
+    this.setState(
+      {
+        searchTerm: event.target.value,
+        searchLoading: true
+      },
+      () => this.handleSearchMessages()
     );
   };
 
@@ -65,7 +77,7 @@ class Messages extends React.Component {
       return acc;
     }, []);
     this.setState({ searchResults });
-    setTimeout(() => this.setState({ searchLoading: false }, 1000));
+    setTimeout(() => this.setState({ searchLoading: false }), 1000);
   };
   countUniqueUsers = messages => {
     const uniqueUsers = messages.reduce((acc, message) => {
@@ -100,7 +112,8 @@ class Messages extends React.Component {
     }
   };
 
-  displayChannelName = channel => (channel ? `#${channel.name}` : "");
+  displayChannelName = channel =>
+    channel ? `${this.state.privateChannel ? "@" : "#"}${channel.name}` : "";
   render() {
     const {
       messagesRef,
@@ -111,7 +124,8 @@ class Messages extends React.Component {
       progressBar,
       numUniqueUsers,
       searchTerm,
-      searchResults
+      searchResults,
+      privateChannel
     } = this.state;
     return (
       <React.Fragment>
@@ -120,6 +134,7 @@ class Messages extends React.Component {
           numUniqueUsers={numUniqueUsers}
           handleSearchChange={this.handleSearchChange}
           searchLoading={searchLoading}
+          isPrivateChannel={privateChannel}
         />
         <Segment>
           <Comment.Group
@@ -135,6 +150,8 @@ class Messages extends React.Component {
           currentChannel={channel}
           currentUser={user}
           isProgressBarVisible={this.isProgressBarVisible}
+          isPrivateChannel={privateChannel}
+          getMessageRef={this.getMessagesRef}
         />
       </React.Fragment>
     );
