@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import "./App.css";
 import { Grid } from "semantic-ui-react";
+import "./App.css";
+import { connect } from "react-redux";
 import ColorPanel from "./ColorPanel/ColorPanel";
 import SidePanel from "./SidePanel/SidePanel";
 import Messages from "./Messages/Messages";
-import { connect } from "react-redux";
 import MetaPanel from "./MetaPanel/MetaPanel";
 const App = ({
   currentUser,
@@ -21,8 +21,8 @@ const App = ({
       style={{ background: secondaryColor }}
     >
       <ColorPanel
-        currentUser={currentUser}
         key={currentUser && currentUser.name}
+        currentUser={currentUser}
       />
       <SidePanel
         key={currentUser && currentUser.uid}
