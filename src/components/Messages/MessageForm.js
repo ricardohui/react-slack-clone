@@ -3,11 +3,10 @@ import uuidv4 from "uuid/v4";
 import firebase from "../../firebase";
 import { Segment, Button, Input } from "semantic-ui-react";
 import Channels from "../SidePanel/Channels";
-import FileModal from "./FileModal";
-import MetaPanel from "../MetaPanel/MetaPanel";
-import ProgressBar from "./ProgressBar";
 import { Picker, emojiIndex } from "emoji-mart";
 import "emoji-mart/css/emoji-mart.css";
+import FileModal from "./FileModal";
+import ProgressBar from "./ProgressBar";
 class MessageForm extends React.Component {
   state = {
     storageRef: firebase.storage().ref(),
@@ -18,7 +17,6 @@ class MessageForm extends React.Component {
     message: "",
     channel: this.props.currentChannel,
     user: this.props.currentUser,
-    messagesLoading: true,
     loading: false,
     errors: [],
     modal: false,
@@ -30,7 +28,10 @@ class MessageForm extends React.Component {
   handleChange = event => {
     this.setState({ [event.target.name]: event.target.value });
   };
-  handleKeyDown = () => {
+  handleKeyDown = event => {
+    if (event.ctrlKey && event.keyCode === 13) {
+      this.sendMessage();
+    }
     const { message, typingRef, channel, user } = this.state;
     if (message) {
       typingRef
@@ -47,6 +48,29 @@ class MessageForm extends React.Component {
 
   handleTogglePicker = () => {
     this.setState({ emojiPicker: !this.state.emojiPicker });
+  };
+
+  handleAddEmoji = emoji => {
+    const oldMessage = this.state.message;
+    // append the emoji at the end of the message
+    const newMessage = this.colonToUnicode(`${oldMessage} ${emoji.colons}`);
+    this.setState({ message: newMessage, emojiPicker: false });
+    setTimeout(() => this.messageInputRef.focus(), 0);
+  };
+
+  colonToUnicode = message => {
+    return message.replace(/:[A-Za-z0-9_+-]+:/g, x => {
+      x = x.replace(/:/g, "");
+      let emoji = emojiIndex.emojis[x];
+      if (typeof emoji !== "undefined") {
+        let unicode = emoji.native;
+        if (typeof unicode !== "undefined") {
+          return unicode;
+        }
+      }
+      x = ":" + x + ":";
+      return x;
+    });
   };
   createMessage = (fileUrl = null) => {
     const message = {
@@ -169,28 +193,6 @@ class MessageForm extends React.Component {
       });
   };
 
-  handleAddEmoji = emoji => {
-    const oldMessage = this.state.message;
-    // append the emoji at the end of the message
-    const newMessage = this.colonToUnicode(`${oldMessage} ${emoji.colons}`);
-    this.setState({ message: newMessage, emojiPicker: false });
-    setTimeout(() => this.messageInputRef.focus(), 0);
-  };
-
-  colonToUnicode = message => {
-    return message.replace(/:[A-Za-z0-9_+-]+:/g, x => {
-      x = x.replace(/:/g, "");
-      let emoji = emojiIndex.emojis[x];
-      if (typeof emoji !== "undefined") {
-        let unicode = emoji.native;
-        if (typeof unicode !== "undefined") {
-          return unicode;
-        }
-      }
-      x = ":" + x + ":";
-      return x;
-    });
-  };
   render() {
     const {
       errors,
@@ -218,6 +220,7 @@ class MessageForm extends React.Component {
           onChange={this.handleChange}
           onKeyDown={this.handleKeyDown}
           value={message}
+          ref={node => (this.messageInputRef = node)}
           style={{ marginBottom: "0.7em" }}
           label={
             <Button
@@ -226,7 +229,6 @@ class MessageForm extends React.Component {
               onClick={this.handleTogglePicker}
             />
           }
-          ref={node => (this.messageInputRef = node)}
           labelPosition="left"
           className={
             errors.some(error => error.message.includes("message"))
