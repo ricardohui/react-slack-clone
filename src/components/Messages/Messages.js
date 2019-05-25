@@ -8,6 +8,7 @@ import MessageForm from "./MessageForm";
 import Message from "./Message";
 import ProgressBar from "./ProgressBar";
 import Typing from "./Typing";
+import Skeleton from "./Skeleton";
 class Messages extends React.Component {
   state = {
     privateChannel: this.props.isPrivateChannel,
@@ -38,7 +39,14 @@ class Messages extends React.Component {
       this.addUserStarsListener(channel.id, user.uid);
     }
   }
-
+  componentDidUpdate(prevProps, prevState) {
+    if (this.messageEnd) {
+      this.scrollToBottom();
+    }
+  }
+  scrollToBottom = () => {
+    this.messageEnd.scrollIntoView({ behavior: "smooth" });
+  };
   addListeners = channelId => {
     this.addMessageListener(channelId);
     this.addTypingListeners(channelId);
@@ -109,14 +117,6 @@ class Messages extends React.Component {
   getMessagesRef = () => {
     const { messagesRef, privateMessagesRef, privateChannel } = this.state;
     return privateChannel ? privateMessagesRef : messagesRef;
-  };
-  componentDidUpdate(prevProps, prevState) {
-    if (this.messageEnd) {
-      this.scrollToBottom();
-    }
-  }
-  scrollToBottom = () => {
-    this.messageEnd.scrollIntoView({ behavior: "smooth" });
   };
 
   handleStar = () => {
@@ -240,6 +240,15 @@ class Messages extends React.Component {
       </div>
     ));
 
+  displayMessageSkeleton = loading =>
+    loading ? (
+      <React.Fragment>
+        {[...Array(10)].map((_, i) => (
+          <Skeleton key={i} />
+        ))}
+      </React.Fragment>
+    ) : null;
+
   render() {
     const {
       messagesRef,
@@ -253,7 +262,8 @@ class Messages extends React.Component {
       searchResults,
       privateChannel,
       isChannelStarred,
-      typingUsers
+      typingUsers,
+      messagesLoading
     } = this.state;
     return (
       <React.Fragment>
@@ -270,6 +280,7 @@ class Messages extends React.Component {
           <Comment.Group
             className={ProgressBar ? "message_progress" : "messages"}
           >
+            {this.displayMessageSkeleton(messagesLoading)}
             {searchTerm
               ? this.displayMessages(searchResults)
               : this.displayMessages(messages)}
