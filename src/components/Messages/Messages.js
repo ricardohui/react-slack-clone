@@ -110,6 +110,14 @@ class Messages extends React.Component {
     const { messagesRef, privateMessagesRef, privateChannel } = this.state;
     return privateChannel ? privateMessagesRef : messagesRef;
   };
+  componentDidUpdate(prevProps, prevState) {
+    if (this.messageEnd) {
+      this.scrollToBottom();
+    }
+  }
+  scrollToBottom = () => {
+    this.messageEnd.scrollIntoView({ behavior: "smooth" });
+  };
 
   handleStar = () => {
     this.setState(
@@ -266,6 +274,7 @@ class Messages extends React.Component {
               ? this.displayMessages(searchResults)
               : this.displayMessages(messages)}
             {this.displayTypingUsers(typingUsers)}
+            <div ref={node => (this.messageEnd = node)} />
           </Comment.Group>
         </Segment>
         <MessageForm
